@@ -172,15 +172,18 @@ def read_setup(dirname, highlight=True):
     setup = SimpleNamespace()
 
     if setup_file.is_file():
+        print(f'reading {setup_file.name}')
         if highlight:
-            setup.functions = syntax_highlight(parse_setup)
+            setup.functions = syntax_highlight(parse_setup(setup_file))
         else:
-            setup.functions = parse_setup
+            setup.functions = parse_setup(setup_file)
 
     if ini_file.is_file():
+        print(f'reading {ini_file.name}')
         setup.ini = parse_ini(ini_file)
 
     if def_file.is_file():
+        print(f'reading {def_file.name}')
         setup.defs = parse_definitions(def_file)
 
     return setup
