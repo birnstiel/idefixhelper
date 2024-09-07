@@ -1,14 +1,17 @@
 from importlib import metadata as _md
-from .idefixhelper import parse_ini, parse_units, parse_plutolog, parse_definitions, make_grids, compute_vorticity
+from .idefixhelper import parse_ini
+from .idefixhelper import parse_idefixlog
+from .idefixhelper import parse_definitions
+from .idefixhelper import parse_setup
+from .idefixhelper import read_setup
 
 __name__ = "idefixhelper"
 __version__ = _md.version("idefixhelper")
 
 __all__ = [
     'parse_ini',
-    'parse_units',
-    'parse_plutolog',
+    'parse_idefixlog',
     'parse_definitions',
-    'make_grids',
-    'compute_vorticity'
+    'parse_setup',
+    'read_setup'
 ]
