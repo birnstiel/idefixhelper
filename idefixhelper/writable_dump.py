@@ -76,7 +76,7 @@ class WritableDumpDataset(DumpDataset):
         with open(fname, 'wb') as fh:
 
             # write the same header
-            fh.write(bindary_header)
+            fh.write(binary_header)
 
             # write the coordinates
             fields = ['x1', 'x1l', 'x1r', 'x2',
