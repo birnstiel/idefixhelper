@@ -54,6 +54,9 @@ class WritableDumpDataset(DumpDataset):
         name += ((NAME_SIZE - len(name)) * ' ').encode()
         fh.write(name)
 
+        # write the data type
+        fh.write(ntype.to_bytes(length=INT_SIZE, byteorder=byteorder))
+
         # write the number of dimensions
         fh.write(arr.ndim.to_bytes(length=INT_SIZE, byteorder=byteorder))
 
