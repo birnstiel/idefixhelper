@@ -2,6 +2,7 @@ import os
 import sys
 import struct
 from pathlib import Path
+import numpy as np
 
 # try to import the IDEFIX_DIR from the environment
 if not 'IDEFIX_DIR' in os.environ:
@@ -23,7 +24,7 @@ class WritableDumpDataset(DumpDataset):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def _write_field(self, fh, field, arr):
+    def _write_field(self, fh, field, arr, byteorder="little"):
 
         # determine the data type and sizes
         dtype = arr.dtype.name
