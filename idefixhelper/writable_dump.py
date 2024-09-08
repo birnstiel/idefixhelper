@@ -21,11 +21,26 @@ from pytools.dump_io import BOOL_SIZE
 
 
 class WritableDumpDataset(DumpDataset):
+    """
+    A class representing a writable dump dataset.
+    This class inherits from the `DumpDataset` class and provides additional functionality for writing dump data to a file.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.name = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\xd7\x93B\xcbe;\xac'
 
     def _write_field(self, fh, field, arr, byteorder="little"):
+        """
+        Write a field to a file.
+        Args:
+            fh (file): The file handle to write to.
+            field (str): The name of the field.
+            arr (ndarray): The array containing the data to write.
+            byteorder (str, optional): The byte order of the data. Defaults to "little".
+        Raises:
+            RuntimeError: If an unknown data type is encountered.
+        """
 
         # determine the data type and sizes
         dtype = arr.dtype.name
@@ -70,6 +85,15 @@ class WritableDumpDataset(DumpDataset):
         fh.write(raw)
 
     def write_dump(self, fname):
+        """
+        Write the dump to a file.
+
+        Parameters:
+            fname (str): The path of the output file.
+
+        Returns:
+            None
+        """
 
         # get original header
         with open(self.filename, 'rb') as fh:

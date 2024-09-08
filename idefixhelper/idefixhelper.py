@@ -6,6 +6,7 @@ import re
 from IPython.display import Markdown
 import numpy as np
 
+
 def ev(value):
     "parse a string value as python number/list or keeps it as string."
     try:
@@ -13,6 +14,7 @@ def ev(value):
     except (ValueError, SyntaxError):
         res = value
     return res
+
 
 def parse_ini(fname, i=0):
     """parses the a `idefix.ini` file and returns a namespace with the settings.
@@ -23,7 +25,8 @@ def parse_ini(fname, i=0):
     elif isinstance(fname, list):
         text = fname
     else:
-        raise ValueError('fname needs to be a file path or list of line-strings!')
+        raise ValueError(
+            'fname needs to be a file path or list of line-strings!')
 
     data = SimpleNamespace()
     while i < len(text):
@@ -32,7 +35,8 @@ def parse_ini(fname, i=0):
         if line == '':
             continue
         if line.startswith('['):
-            section_name = line.strip('[]').replace('.', '_').replace('-', '_').replace(' ', '_')
+            section_name = line.strip('[]').replace(
+                '.', '_').replace('-', '_').replace(' ', '_')
             section = SimpleNamespace()
             setattr(data, section_name, section)
         else:
@@ -44,31 +48,32 @@ def parse_ini(fname, i=0):
             res = [ev(l) for l in ls]
             if len(res) == 1:
                 res = res[0]
-            
+
             setattr(section, name, res)
     return data
 
 
 def parse_definitions(fname):
     "parses a idefix `definitions.hpp` file (or list of strings), returns contents as namespace"
-    
+
     if isinstance(fname, (Path, str)):
         text = Path(fname).read_text().split('\n')
     elif isinstance(fname, list):
         text = fname
     else:
-        raise ValueError('fname needs to be a file path or list of line-strings!')
+        raise ValueError(
+            'fname needs to be a file path or list of line-strings!')
 
     # clean up empty lines and whitespace
-    text = [line.strip() for line in text if line.strip()!='']
-    
+    text = [line.strip() for line in text if line.strip() != '']
+
     data = SimpleNamespace()
 
     for line in text:
-        # we ignore lines that don't start with #define       
+        # we ignore lines that don't start with #define
         if not line.startswith('#define'):
             continue
-        
+
         split = line.split()[1:]
         if len(split) == 1:
             setattr(data, split[0], True)
@@ -76,17 +81,17 @@ def parse_definitions(fname):
             setattr(data, split[0], ev(split[1]))
         else:
             setattr(data, split[0], ev(split[1:]))
-                
+
     return data
 
 
 def parse_idefixlog(fname):
     """parse a idefix log file for settings and definitions"""
-    
+
     text = Path(fname).read_text().split('\n')
     i = 0
     ########## Parse idefix.ini part ########
-    while not text[i].strip().startswith('Input Parameters using input file'):    
+    while not text[i].strip().startswith('Input Parameters using input file'):
         i += 1
     ini_filename = text[i].split()[-1].replace(':', '')
     # found start
@@ -98,20 +103,19 @@ def parse_idefixlog(fname):
 
     config = parse_ini(subtext)
     config.ini_filename = ini_filename
-    
+
     ######## parse  other lines ########
     while not ('Input: DIMENSIONS=' in text[i]):
-        i+= 1
+        i += 1
     config.DIMENSIONS = text[i].strip('.').split('=')[-1]
 
     while not ('Input: COMPONENTS=' in text[i]):
-        i+= 1
+        i += 1
     config.COMPONENTS = text[i].strip('.').split('=')[-1]
 
     while not ('Gravity: G=' in text[i]):
-        i+= 1
+        i += 1
     config.G = ev(text[i].split('=')[-1])
-
 
     ######### return the data ###########
     return config
@@ -127,16 +131,17 @@ def parse_setup(fname):
     elif isinstance(fname, list):
         text = fname
     else:
-        raise ValueError('fname needs to be a file path or list of line-strings!')
-    
+        raise ValueError(
+            'fname needs to be a file path or list of line-strings!')
+
     i = 0
     functions = SimpleNamespace()
-    
+
     while i < len(text):
         # scan to next function
         while (i < len(text)) and (not text[i].strip().startswith('void ')):
             i += 1
-            
+
         # get name of function
         fct_name = ''.join(text[i].strip().split()[1:]).split('(')[0]
         subtext = [text[i]]
@@ -148,19 +153,40 @@ def parse_setup(fname):
 
         # store it
         setattr(functions, fct_name, '\n'.join(subtext))
-    
+
     return functions
 
 
 def syntax_highlight(fcts):
+    """
+    Syntax highlight the functions in the given object.
+    Args:
+        fcts: An object containing functions.
+    Returns:
+        An object with syntax highlighted functions.
+    Example:
+        >>> fcts = SomeObject()
+        >>> highlighted = syntax_highlight(fcts)
+    """
     keys = [v for v in fcts.__dir__() if not v.startswith('_')]
     output = SimpleNamespace()
     for k in keys:
         setattr(output, k, Markdown('```cpp\n' + getattr(fcts, k) + '\n```'))
-    return  output
+    return output
 
 
 def read_setup(dirname, highlight=True):
+    """
+    Reads the setup files from the specified directory.
+    Args:
+        dirname (str): The path to the directory containing the setup files.
+        highlight (bool, optional): Whether to apply syntax highlighting to the setup file. Defaults to True.
+    Returns:
+        setup (namespace): An object containing the parsed setup information.
+    Raises:
+        AssertionError: If the specified dirname is not a directory.
+    """
+
     dirname = Path(dirname)
 
     assert dirname.is_dir(), 'dirname must be a directory'
