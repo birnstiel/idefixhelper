@@ -23,6 +23,7 @@ from pytools.dump_io import BOOL_SIZE
 class WritableDumpDataset(DumpDataset):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.name = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\xd7\x93B\xcbe;\xac'
 
     def _write_field(self, fh, field, arr, byteorder="little"):
 
@@ -50,9 +51,7 @@ class WritableDumpDataset(DumpDataset):
                 f"Found unknown data type {dtype} for field {field}")
 
         # write a NAME_SIZES binary string with the field name
-        name = field.encode() + b"\x00"
-        name += ((NAME_SIZE - len(name)) * ' ').encode()
-        fh.write(name)
+        fh.write(field.encode() + b'\x00' + self.name[len(field)+1:])
 
         # write the data type
         fh.write(ntype.to_bytes(length=INT_SIZE, byteorder=byteorder))
@@ -61,7 +60,7 @@ class WritableDumpDataset(DumpDataset):
         fh.write(arr.ndim.to_bytes(length=INT_SIZE, byteorder=byteorder))
 
         # write the length of all dimensions
-        for n in arr.shape[::-1]:
+        for n in arr.shape:
             fh.write(n.to_bytes(length=INT_SIZE, byteorder=byteorder))
 
         # pack the struct & write it
@@ -83,12 +82,20 @@ class WritableDumpDataset(DumpDataset):
             fh.write(binary_header)
 
             # write the coordinates
-            fields = ['x1', 'x1l', 'x1r', 'x2',
-                      'x2l', 'x2r', 'x3', 'x3l', 'x3r']
+            fields = {
+                'x1': 'x1',
+                'x1l': 'xl1',
+                'x1r': 'xr1',
+                'x2': 'x2',
+                'x2l': 'xl2',
+                'x2r': 'xr2',
+                'x3': 'x3',
+                'x3l': 'xl3',
+                'x3r': 'xr3'}
 
-            for field in fields:
-                arr = getattr(self, field)
-                self._write_field(fh, field, arr)
+            for field1, field2 in fields.items():
+                arr = getattr(self, field1)
+                self._write_field(fh, field2, arr)
 
             # write out all the fields in data
 
