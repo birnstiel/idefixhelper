@@ -44,7 +44,7 @@ def parse_ini(fname, i=0):
             string = line[len(name):].strip()
 
             # convert to value(s)
-            ls = re.sub('\s+', ' ', string).split(' ')
+            ls = re.sub(r'\s+', ' ', string).split(' ')
             res = [ev(l) for l in ls]
             if len(res) == 1:
                 res = res[0]
