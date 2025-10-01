@@ -30,7 +30,7 @@ def parse_ini(fname, i=0):
 
     data = SimpleNamespace()
     while i < len(text):
-        line = text[i].strip()
+        line = text[i].split('#')[0].strip()  # remove comments
         i += 1
         if line == '':
             continue
